@@ -89,14 +89,19 @@ Nach dem Neustart kannst du die Integration hinzufügen:
 
 -----
 
-## ⚠️ Disclaimer
+## ⚖️ Haftungsausschluss & Lizenz
 
-Diese Integration greift aktiv in die Steuerung deines Energiesystems ein. Obwohl sie mit größter Sorgfalt entwickelt wurde und über Sicherheitsmechanismen (Heartbeats, Plausibilitätschecks) verfügt:
+Dieses Projekt steht unter der **MIT Lizenz**.
 
-  * **Nutzung auf eigene Gefahr.**
-  * Der Entwickler übernimmt keine Haftung für entgangene Einsparungen, leere Akkus oder Hardware-Probleme.
-  * Bitte überprüfe nach der Installation die ersten Ladezyklen, um sicherzustellen, dass deine Hardware korrekt auf die Befehle reagiert.
+**WICHTIGER HINWEIS:**
+Diese Software interagiert direkt mit Hardware (Wechselrichtern, Batteriespeichern) und steuert Lade-/Entladeprozesse. Obwohl die Software mit Sicherheitsmechanismen (z.B. Heartbeats, Plausibilitätschecks) entwickelt wurde, erfolgt die Nutzung **auf eigene Gefahr**.
 
+Der Entwickler übernimmt keine Haftung für:
+* Schäden an der Hardware (Inverter, Akku).
+* Finanzielle Verluste durch unerwartetes Ladeverhalten (z.B. Laden zu Hochpreisphasen bei API-Fehlern).
+* Funktionsstörungen durch Updates von Home Assistant oder Tibber.
+
+Bitte teste die Integration nach der Installation sorgfältig und überwache die ersten Ladezyklen.
 -----
 
 ## ❤️ Unterstützung
