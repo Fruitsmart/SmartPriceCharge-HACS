@@ -38,7 +38,7 @@ Damit SmartPriceCharge funktioniert, benötigst du:
 
 1.  Eine **Home Assistant** Installation.
 2.  Einen dynamischen Stromtarif (z.B. **Tibber**) und die entsprechenden Preissensoren.
-3.  Eine PV-Prognose-Integration (Empfehlung: [ha-solar-forecast-ml]([https://github.com/rany2/ha-solar-forecast-ml](https://github.com/Zara-Toorox/ha-solar-forecast-ml)) oder Solcast).
+3.  Eine PV-Prognose-Integration (Empfehlung: [ha-solar-forecast-ml](https://github.com/rany2/ha-solar-forecast-ml) oder Solcast).
 4.  Einen steuerbaren Wechselrichter/Speicher, dessen SoC-Limit/Ladestrom via HA gesetzt werden kann.
 
 -----
