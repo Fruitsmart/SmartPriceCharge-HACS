@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Mac Systemdateien
+.DS_Store
+
+# Home Assistant Config (falls du im selben Ordner testest)
+*.log
+.storage/
+home-assistant_v2.db
