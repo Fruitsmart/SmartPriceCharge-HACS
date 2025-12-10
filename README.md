@@ -54,7 +54,7 @@ Da diese Integration (noch) nicht im Standard-HACS-Store ist, muss sie als "Cust
 3.  Klicke oben rechts auf die **drei Punkte (Menü)** und wähle **Benutzerdefinierte Repositories**.
 4.  Füge die URL dieses Repositories in das Feld ein:
     ```text
-    https://github.com/DEIN_USERNAME/SmartPriceCharge
+    https://github.com/Fruitsmart/SmartPriceCharge-HACS
     ```
 5.  Wähle als Kategorie **Integration**.
 6.  Klicke auf **Hinzufügen**.
