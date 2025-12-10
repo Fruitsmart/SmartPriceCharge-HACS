@@ -102,6 +102,7 @@ Der Entwickler übernimmt keine Haftung für:
 * Funktionsstörungen durch Updates von Home Assistant oder Tibber.
 
 Bitte teste die Integration nach der Installation sorgfältig und überwache die ersten Ladezyklen.
+
 -----
 
 ## ❤️ Unterstützung
