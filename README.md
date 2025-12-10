@@ -99,8 +99,13 @@ Diese Integration greift aktiv in die Steuerung deines Energiesystems ein. Obwoh
 
 -----
 
-## ☕ Support
+## ❤️ Unterstützung
 
-Wenn dir die Integration gefällt und sie dir Geld spart:
+Gefällt dir dieses Projekt? Wenn es dir hilft, Stromkosten zu sparen, freue ich mich über einen Kaffee ☕️
 
-*(Hier könntest du optional einen BuyMeACoffee Link oder Ähnliches einfügen)*
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=fam.obst@live.de&item_name=TibberSmartCharge&currency_code=EUR)
+
+
+## 📄 Lizenz
+
+Dieses Projekt ist unter der MIT-Lizenz lizenziert - siehe die [LICENSE](LICENSE) Datei für Details.
