@@ -61,6 +61,7 @@ Da diese Integration (noch) nicht im Standard-HACS-Store ist, muss sie als "Cust
     ```text
     https://github.com/Fruitsmart/SmartPriceCharge-HACS
     ```
+    [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=fam.obst@live.de&item_name=TibberSmartCharge&currency_code=EUR)
 5.  Wähle als Kategorie **Integration**.
 6.  Klicke auf **Hinzufügen**.
 7.  Suche nun in HACS nach "SmartPriceCharge" und installiere es.
