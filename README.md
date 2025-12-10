@@ -58,14 +58,17 @@ Da diese Integration (noch) nicht im Standard-HACS-Store ist, muss sie als "Cust
 2.  Gehe auf **Integrationen**.
 3.  Klicke oben rechts auf die **drei Punkte (Menü)** und wähle **Benutzerdefinierte Repositories**.
 4.  Füge die URL dieses Repositories in das Feld ein:
+
+   [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Fruitsmart&repository=https%3A%2F%2Fgithub.com%2FFruitsmart%2FSmartPriceCharge-HACS)
+   
     ```text
     https://github.com/Fruitsmart/SmartPriceCharge-HACS
     ```
-    [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=fam.obst@live.de&item_name=TibberSmartCharge&currency_code=EUR)
-5.  Wähle als Kategorie **Integration**.
-6.  Klicke auf **Hinzufügen**.
-7.  Suche nun in HACS nach "SmartPriceCharge" und installiere es.
-8.  **Starte Home Assistant neu.**
+
+6.  Wähle als Kategorie **Integration**.
+7.  Klicke auf **Hinzufügen**.
+8.  Suche nun in HACS nach "SmartPriceCharge" und installiere es.
+9.  **Starte Home Assistant neu.**
 
 ### Manuelle Installation
 
