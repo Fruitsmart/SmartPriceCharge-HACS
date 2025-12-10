@@ -1,9 +1,3 @@
-Hier ist ein vollständiger Entwurf für deine `README.md`. Ich habe sie professionell strukturiert, mit Badges versehen und die Funktionen so beschrieben, dass Nutzer sofort verstehen, warum diese Integration besser ist als einfache Skripte.
-
-Da du erwähnt hast, dass es noch "privat" bzw. nicht im offiziellen Store ist, habe ich die Installationsanleitung auf **"Custom Repository"** ausgelegt.
-
------
-
 # 🔋 SmartPriceCharge
 
 [](https://github.com/hacs/integration)
