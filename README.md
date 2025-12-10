@@ -1,3 +1,7 @@
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/Fruitsmart/SmartPriceCharge-HACS/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 # 🔋 SmartPriceCharge
 
 [](https://github.com/hacs/integration)
