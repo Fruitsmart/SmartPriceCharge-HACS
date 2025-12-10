@@ -1,0 +1,67 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "title": "SmartPriceCharge: Connection",
+                "description": "Step 1/3: Connect Tibber and Battery.",
+                "data": {
+                    "tibber_api_token": "Tibber API Token",
+                    "current_soc_sensor_id": "Battery SoC Sensor (%)",
+                    "inverter_mode_entity_id": "Inverter Mode Entity",
+                    "battery_capacity_kwh": "Capacity (kWh)",
+                    "charger_power_kw": "Max Charge Power (kW)",
+                    "reference_price_eur": "Reference Price Grid (e.g. 0.35 €)"
+                }
+            },
+            "sensors": {
+                "title": "SmartPriceCharge: Power",
+                "description": "Step 2/3: Power Sensors.",
+                "data": {
+                    "current_pv_power_sensor_id": "PV Power (W)",
+                    "grid_power_import_export_sensor_id": "Grid Power (W)",
+                    "battery_power_sensor_id": "Battery Power (W)",
+                    "current_house_consumption_id": "House Consumption (W)",
+                    "avg_consumption_sensor_id": "Avg Consumption 24h (W)"
+                }
+            },
+            "forecast": {
+                "title": "SmartPriceCharge: Forecast",
+                "description": "Step 3/3: Weather & Notify.",
+                "data": {
+                    "pv_forecast_sensor_id": "PV Forecast Next Hour",
+                    "pv_forecast_today_remaining_sensor_id": "PV Forecast Remaining",
+                    "pv_forecast_tomorrow_sensor_id": "PV Forecast Tomorrow",
+                    "weather_sensor_id": "Weather Entity",
+                    "sun_sensor_id": "Sun Entity",
+                    "notification_service": "Notify Service (e.g. notify.mobile_app)"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "SmartPriceCharge Settings",
+                "data": {
+                    "battery_efficiency_factor": "Battery Efficiency (0.9 = 90%)",
+                    "pv_forecast_safety_factor": "PV Forecast Safety Factor",
+                    "min_cycle_profit_eur": "Min Cycle Profit (€)",
+                    "min_price_spread_eur": "Min Price Spread (€)",
+                    "soc_threshold_medium": "SoC Threshold Medium (%)",
+                    "spread_medium_soc_eur": "Spread at Medium SoC (€)",
+                    "soc_threshold_high": "SoC Threshold High (%)",
+                    "spread_high_soc_eur": "Spread at High SoC (€)",
+                    "sleep_over_soc": "Sleep-Over Reserve (%)",
+                    "morning_min_diff": "Morning Price Diff for Sleep-Over (€)"
+                }
+            }
+        }
+    }
+}
