@@ -82,6 +82,9 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
         """Initialisiert den Options Flow."""
+        # Log-Eintrag zur Bestätigung, dass der neue Code geladen wurde
+        _LOGGER.info("SmartPriceOptionsFlowHandler fix geladen")
+        
         # WICHTIG: Die Property self.config_entry ist in neueren HA Versionen schreibgeschützt!
         # Wir speichern die Entry daher in einer privaten Variable self._config_entry.
         self._config_entry = config_entry
