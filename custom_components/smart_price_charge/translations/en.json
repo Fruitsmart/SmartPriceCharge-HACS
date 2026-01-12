@@ -14,10 +14,13 @@
                 "data": {
                     "tibber_api_token": "Tibber API Token",
                     "current_soc_sensor_id": "Battery SoC Sensor (%)",
-                    "inverter_mode_entity_id": "Inverter Mode Entity",
                     "battery_capacity_kwh": "Capacity (kWh)",
                     "charger_power_kw": "Max Charge Power (kW)",
-                    "reference_price_eur": "Reference Price Grid (e.g. 0.35 €)"
+                    "reference_price_eur": "Reference Price Grid (e.g. 0.35 €)",
+                    
+                    "inverter_mode_entity_id": "Inverter Mode Entity (Select)",
+                    "mode_option_normal": "Mode Name: Normal (e.g. 'General' or 'maximise_self_consumption')",
+                    "mode_option_force_charge": "Mode Name: Force Charge (e.g. 'Eco Charge' or 'time_of_use_luna2000')"
                 }
             },
             "sensors": {
@@ -38,6 +41,7 @@
                     "pv_forecast_sensor_id": "PV Forecast Next Hour",
                     "pv_forecast_today_remaining_sensor_id": "PV Forecast Remaining",
                     "pv_forecast_tomorrow_sensor_id": "PV Forecast Tomorrow",
+                    "pv_peak_time_sensor_id": "PV Peak Time (Sensor)",
                     "weather_sensor_id": "Weather Entity",
                     "sun_sensor_id": "Sun Entity",
                     "notification_service": "Notify Service (e.g. notify.mobile_app)"
@@ -50,6 +54,15 @@
             "init": {
                 "title": "SmartPriceCharge Settings",
                 "data": {
+                    "inverter_mode_entity_id": "Inverter Mode Entity (Select)",
+                    "mode_option_normal": "Mode Name: Normal (Value to send)",
+                    "mode_option_force_charge": "Mode Name: Force Charge (Value to send)",
+                    
+                    "inverter_min_soc_entity_id": "Inverter Limit Entity (Number)",
+                    "inverter_min_soc_invert_logic": "Invert Logic? (100 - Value)",
+                    "target_soc_pct": "Target SoC (%)",
+                    "min_soc_pct": "Min SoC Limit (%)",
+
                     "battery_efficiency_factor": "Battery Efficiency (0.9 = 90%)",
                     "pv_forecast_safety_factor": "PV Forecast Safety Factor",
                     "min_cycle_profit_eur": "Min Cycle Profit (€)",
@@ -59,7 +72,10 @@
                     "soc_threshold_high": "SoC Threshold High (%)",
                     "spread_high_soc_eur": "Spread at High SoC (€)",
                     "sleep_over_soc": "Sleep-Over Reserve (%)",
-                    "morning_min_diff": "Morning Price Diff for Sleep-Over (€)"
+                    "morning_min_diff": "Morning Price Diff for Sleep-Over (€)",
+                    
+                    "notification_active": "Enable Notifications?",
+                    "notification_service": "Notify Service"
                 }
             }
         }
