@@ -1,92 +1,123 @@
+"""Config flow für SmartPriceCharge."""
+import logging
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SCAN_INTERVAL
+from homeassistant.helpers import selector
+from .const import *
 
-from .const import (
-    DOMAIN,
-    CONF_MIN_SOC,
-    CONF_MAX_SOC,
-    CONF_CHARGE_POWER,
-    CONF_DISCHARGE_POWER,
-    DEFAULT_MIN_SOC,
-    DEFAULT_MAX_SOC,
-    DEFAULT_CHARGE_POWER,
-    DEFAULT_DISCHARGE_POWER,
-    DEFAULT_PORT,
-    DEFAULT_SCAN_INTERVAL,
-)
+_LOGGER = logging.getLogger(__name__)
 
-class SmartPriceConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Smart Price Charge."""
+class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
-
-    async def async_step_user(self, user_input=None):
-        """Handle the initial step."""
-        errors = {}
-        if user_input is not None:
-            # Validierung könnte hier hinzugefügt werden (z.B. Test-Verbindung)
-            return self.async_create_entry(title="Smart Price Charge", data=user_input)
-
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema({
-                vol.Required(CONF_HOST): str,
-                vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
-                vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
-            }),
-            errors=errors
-        )
 
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
+        # FIX: Der Handler wird mit dem config_entry initialisiert
         return SmartPriceOptionsFlowHandler(config_entry)
 
+    async def async_step_user(self, user_input=None):
+        if user_input is not None:
+            self.context["user_input"] = user_input
+            return await self.async_step_sensors()
+
+        data_schema = vol.Schema({
+            vol.Required(CONF_TIBBER_TOKEN): str,
+            vol.Required(CONF_SOC_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="battery")),
+            vol.Required(CONF_INVERTER_ENTITY): selector.EntitySelector(selector.EntitySelectorConfig(domain=["select", "input_select"])),
+            vol.Required(CONF_REFERENCE_PRICE, default=DEFAULT_REF_PRICE): vol.Coerce(float),
+            vol.Required(CONF_BATTERY_CAPACITY, default=DEFAULT_CAPACITY): vol.Coerce(float),
+            vol.Required(CONF_CHARGER_POWER, default=DEFAULT_CHARGER_POWER): vol.Coerce(float),
+        })
+        return self.async_show_form(step_id="user", data_schema=data_schema)
+
+    async def async_step_sensors(self, user_input=None):
+        if user_input is not None:
+            self.context["user_input"].update(user_input)
+            return await self.async_step_forecast()
+        data_schema = vol.Schema({
+            vol.Required(CONF_PV_POWER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+            vol.Required(CONF_GRID_POWER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+            vol.Required(CONF_BATTERY_POWER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+            vol.Optional(CONF_HOUSE_POWER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+            vol.Optional(CONF_AVG_CONSUMPTION): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+        })
+        return self.async_show_form(step_id="sensors", data_schema=data_schema)
+
+    async def async_step_forecast(self, user_input=None):
+        if user_input is not None:
+            data = {**self.context.get("user_input", {}), **user_input}
+            return self.async_create_entry(title="SmartPrice Manager", data=data)
+        data_schema = vol.Schema({
+            # PV Peak Time Sensor
+            vol.Optional(CONF_PV_PEAK_TIME): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            
+            vol.Optional(CONF_PV_FC_NEXT): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            vol.Optional(CONF_PV_FC_REM): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            vol.Optional(CONF_PV_FC_TOMORROW): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            vol.Optional(CONF_WEATHER_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="weather")),
+            vol.Optional(CONF_SUN_SENSOR, default="sun.sun"): selector.EntitySelector(selector.EntitySelectorConfig(domain="sun")),
+            vol.Optional(CONF_NOTIFY_SERVICE): selector.TextSelector(),
+        })
+        return self.async_show_form(step_id="forecast", data_schema=data_schema)
 
 class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for Smart Price Charge."""
+    """Handhabt die Einstellungen."""
 
     def __init__(self, config_entry):
-        """Initialize options flow."""
-        # WICHTIG: self.config_entry ist in neueren HA-Versionen schreibgeschützt.
-        # Wir speichern die Entry-Referenz daher in self._config_entry.
+        """Initialisiert den OptionsFlow Handler."""
+        # FIX: Wir speichern den Eintrag in self._config_entry, da self.config_entry schreibgeschützt ist.
         self._config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
-        """Manage the options."""
         if user_input is not None:
-            # Wir aktualisieren den Eintrag mit den neuen Daten
             return self.async_create_entry(title="", data=user_input)
 
-        # Werte aus den Optionen laden, Fallback auf Config-Daten oder Defaults
-        options = self._config_entry.options
+        # FIX: Zugriff auf self._config_entry statt self.config_entry
+        opts = self._config_entry.options
+        # Fallback auf Data, falls Options noch leer sind
         data = self._config_entry.data
+        
+        def get_opt(key, default):
+            if key in opts: return opts[key]
+            if key in data: return data[key]
+            return default
 
-        # Inverter Einstellungen (Host/Port) - Standard aus Config, falls nicht in Optionen überschrieben
-        host_default = options.get(CONF_HOST, data.get(CONF_HOST, ""))
-        port_default = options.get(CONF_PORT, data.get(CONF_PORT, DEFAULT_PORT))
-        scan_default = options.get(CONF_SCAN_INTERVAL, data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
-
-        # SOC & Power Einstellungen
-        min_soc_default = options.get(CONF_MIN_SOC, DEFAULT_MIN_SOC)
-        max_soc_default = options.get(CONF_MAX_SOC, DEFAULT_MAX_SOC)
-        charge_power_default = options.get(CONF_CHARGE_POWER, DEFAULT_CHARGE_POWER)
-        discharge_power_default = options.get(CONF_DISCHARGE_POWER, DEFAULT_DISCHARGE_POWER)
+        current_inv_entity = get_opt(CONF_INVERTER_MIN_SOC_ENTITY, None)
+        current_notify_service = get_opt(CONF_NOTIFY_SERVICE, "")
 
         schema = vol.Schema({
-            # Inverter Verbindung
-            vol.Required(CONF_HOST, default=host_default): str,
-            vol.Required(CONF_PORT, default=port_default): int,
-            vol.Optional(CONF_SCAN_INTERVAL, default=scan_default): int,
+            # BENACHRICHTIGUNGEN
+            vol.Optional(CONF_NOTIFY_ACTIVE, default=get_opt(CONF_NOTIFY_ACTIVE, True)): bool,
+            vol.Optional(CONF_NOTIFY_SERVICE, description={"suggested_value": current_notify_service}): selector.TextSelector(),
 
-            # Batterie / SOC Einstellungen
-            vol.Optional(CONF_MIN_SOC, default=min_soc_default): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
-            vol.Optional(CONF_MAX_SOC, default=max_soc_default): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+            # 1. Inverter Logic
+            vol.Optional(CONF_INVERTER_MIN_SOC_ENTITY, description={"suggested_value": current_inv_entity}): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
+            ),
+            vol.Optional(CONF_INVERTER_MIN_SOC_INVERT, default=get_opt(CONF_INVERTER_MIN_SOC_INVERT, False)): bool,
+
+            # 2. SoC Slider
+            vol.Optional(CONF_TARGET_SOC, description={"suggested_value": get_opt(CONF_TARGET_SOC, DEFAULT_TARGET_SOC)}): 
+                selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, unit_of_measurement="%")),
+            vol.Optional(CONF_MIN_SOC, description={"suggested_value": get_opt(CONF_MIN_SOC, DEFAULT_MIN_SOC)}): 
+                selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, unit_of_measurement="%")),
+
+            # 3. Faktoren
+            vol.Optional(CONF_BATTERY_EFFICIENCY, description={"suggested_value": get_opt(CONF_BATTERY_EFFICIENCY, DEFAULT_EFFICIENCY)}): vol.Coerce(float),
+            vol.Optional(CONF_PV_SAFETY_FACTOR, description={"suggested_value": get_opt(CONF_PV_SAFETY_FACTOR, DEFAULT_PV_SAFETY)}): vol.Coerce(float),
+            vol.Optional(CONF_MIN_PROFIT, description={"suggested_value": get_opt(CONF_MIN_PROFIT, DEFAULT_MIN_PROFIT)}): vol.Coerce(float),
             
-            # Leistungsgrenzen
-            vol.Optional(CONF_CHARGE_POWER, default=charge_power_default): vol.All(vol.Coerce(int), vol.Range(min=0)),
-            vol.Optional(CONF_DISCHARGE_POWER, default=discharge_power_default): vol.All(vol.Coerce(int), vol.Range(min=0)),
-        })
+            # 4. Spread
+            vol.Optional(CONF_MIN_SPREAD, description={"suggested_value": get_opt(CONF_MIN_SPREAD, DEFAULT_MIN_SPREAD)}): vol.Coerce(float),
+            vol.Optional(CONF_SOC_MED, description={"suggested_value": get_opt(CONF_SOC_MED, DEFAULT_SOC_MED)}): vol.Coerce(float),
+            vol.Optional(CONF_SPREAD_MED, description={"suggested_value": get_opt(CONF_SPREAD_MED, DEFAULT_SPREAD_MED)}): vol.Coerce(float),
+            vol.Optional(CONF_SOC_HIGH, description={"suggested_value": get_opt(CONF_SOC_HIGH, DEFAULT_SOC_HIGH)}): vol.Coerce(float),
+            vol.Optional(CONF_SPREAD_HIGH, description={"suggested_value": get_opt(CONF_SPREAD_HIGH, DEFAULT_SPREAD_HIGH)}): vol.Coerce(float),
 
+            # 5. Sleep Over
+            vol.Optional(CONF_SLEEP_SOC, description={"suggested_value": get_opt(CONF_SLEEP_SOC, DEFAULT_SLEEP_SOC)}): vol.Coerce(float),
+            vol.Optional(CONF_MORNING_DIFF, description={"suggested_value": get_opt(CONF_MORNING_DIFF, DEFAULT_MORNING_DIFF)}): vol.Coerce(float),
+        })
         return self.async_show_form(step_id="init", data_schema=schema)
