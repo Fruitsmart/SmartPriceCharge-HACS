@@ -30,7 +30,7 @@ Anders als statische Zeitpläne nutzt diese Integration eine Kombination aus **T
 
 ### ⚙️ Hardware & UX
 
-  * **Universal Inverter Support (NEU in v1.1.0): Unterstützt jetzt Huawei, Victron, Sungrow & Co. durch konfigurierbares Mapping der Lademodi (z.B. "time_of_use_luna2000").
+  * Universal Inverter Support (NEU in v1.1.0): Unterstützt jetzt Huawei, Victron, Sungrow & Co. durch konfigurierbares Mapping der Lademodi (z.B. "time_of_use_luna2000").
   * **Inverter-Steuerung:** Setzt aktiv den **DoD/SoC-Slider** am Wechselrichter (getestet mit GoodWe, adaptierbar).
   * **Logic Invert:** Unterstützt Wechselrichter, die DoD (Depth of Discharge) statt SoC nutzen (rechnet automatisch `100 - x`).
   * **Safety Heartbeat:** Sendet regelmäßige Befehle, um Timeouts am Inverter zu verhindern.
