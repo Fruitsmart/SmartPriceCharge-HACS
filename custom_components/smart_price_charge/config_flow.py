@@ -14,7 +14,6 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        # FIX: Der Handler muss den config_entry erhalten
         return SmartPriceOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
@@ -34,7 +33,6 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(CONF_MODE_OPTION_FORCE_CHARGE, default=DEFAULT_MODE_FORCE): str,
             
             # --- 3. INVERTER LIMITS (DoD / MinSoc) ---
-            # HIER: Entität UND Logik-Umkehr direkt im Setup
             vol.Optional(CONF_INVERTER_MIN_SOC_ENTITY): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
             ),
@@ -81,7 +79,8 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
     """Handhabt die nachträglichen Einstellungen."""
 
     def __init__(self, config_entry):
-        # FIX: Speichern in _config_entry
+        # Wir nutzen _config_entry (mit Unterstrich), um Konflikte mit der
+        # schreibgeschützten Eigenschaft 'config_entry' in neueren HA-Versionen zu vermeiden.
         self._config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
