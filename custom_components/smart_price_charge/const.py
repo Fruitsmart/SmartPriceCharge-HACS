@@ -10,6 +10,10 @@ CONF_BATTERY_CAPACITY = "battery_capacity_kwh"
 CONF_CHARGER_POWER = "charger_power_kw"
 CONF_REFERENCE_PRICE = "reference_price_eur" 
 
+# --- NEU: Inverter Mode Mapping (Huawei Support) ---
+CONF_MODE_OPTION_NORMAL = "mode_option_normal"         # Was soll bei "General" gesendet werden?
+CONF_MODE_OPTION_FORCE_CHARGE = "mode_option_force_charge" # Was soll bei "Laden" gesendet werden?
+
 # --- Sensoren ---
 CONF_PV_POWER = "current_pv_power_sensor_id"
 CONF_GRID_POWER = "grid_power_import_export_sensor_id"
@@ -22,7 +26,6 @@ CONF_PV_FC_NOW = "pv_forecast_current_hour_sensor_id"
 CONF_PV_FC_NEXT = "pv_forecast_sensor_id"
 CONF_PV_FC_REM = "pv_forecast_today_remaining_sensor_id"
 CONF_PV_FC_TOMORROW = "pv_forecast_tomorrow_sensor_id"
-# NEU: PV Peak Time Sensor
 CONF_PV_PEAK_TIME = "pv_peak_time_sensor_id"
 
 CONF_SUN_SENSOR = "sun_sensor_id"
