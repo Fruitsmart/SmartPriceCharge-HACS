@@ -14,8 +14,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        # KORREKTUR: Hier darf KEIN Argument stehen!
-        return SmartPriceOptionsFlowHandler()
+        return SmartPriceOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:
@@ -25,7 +24,14 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         data_schema = vol.Schema({
             vol.Required(CONF_TIBBER_TOKEN): str,
             vol.Required(CONF_SOC_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="battery")),
+            
+            # INVERTER MODE SETUP
             vol.Required(CONF_INVERTER_ENTITY): selector.EntitySelector(selector.EntitySelectorConfig(domain=["select", "input_select"])),
+            # NEU: Mapping für Normalbetrieb (z.B. General oder maximise_self_consumption)
+            vol.Optional(CONF_MODE_OPTION_NORMAL, default="General"): str,
+            # NEU: Mapping für Laden (z.B. Eco Charge oder time_of_use_luna2000)
+            vol.Optional(CONF_MODE_OPTION_FORCE_CHARGE, default="Eco Charge"): str,
+
             vol.Required(CONF_REFERENCE_PRICE, default=DEFAULT_REF_PRICE): vol.Coerce(float),
             vol.Required(CONF_BATTERY_CAPACITY, default=DEFAULT_CAPACITY): vol.Coerce(float),
             vol.Required(CONF_CHARGER_POWER, default=DEFAULT_CHARGER_POWER): vol.Coerce(float),
@@ -50,9 +56,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data = {**self.context.get("user_input", {}), **user_input}
             return self.async_create_entry(title="SmartPrice Manager", data=data)
         data_schema = vol.Schema({
-            # PV Peak Time Sensor
             vol.Optional(CONF_PV_PEAK_TIME): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-            
             vol.Optional(CONF_PV_FC_NEXT): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             vol.Optional(CONF_PV_FC_REM): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             vol.Optional(CONF_PV_FC_TOMORROW): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
@@ -64,13 +68,15 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
     """Handhabt die Einstellungen."""
+    
+    def __init__(self, config_entry):
+        self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
         opts = self.config_entry.options
-        # Fallback auf Data, falls Options noch leer sind
         data = self.config_entry.data
         
         def get_opt(key, default):
@@ -80,37 +86,45 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
 
         current_inv_entity = get_opt(CONF_INVERTER_MIN_SOC_ENTITY, None)
         current_notify_service = get_opt(CONF_NOTIFY_SERVICE, "")
+        
+        # Inverter Mode defaults
+        curr_mode_normal = get_opt(CONF_MODE_OPTION_NORMAL, "General")
+        curr_mode_charge = get_opt(CONF_MODE_OPTION_FORCE_CHARGE, "Eco Charge")
 
         schema = vol.Schema({
             # BENACHRICHTIGUNGEN
             vol.Optional(CONF_NOTIFY_ACTIVE, default=get_opt(CONF_NOTIFY_ACTIVE, True)): bool,
             vol.Optional(CONF_NOTIFY_SERVICE, description={"suggested_value": current_notify_service}): selector.TextSelector(),
 
-            # 1. Inverter Logic
+            # 1. Inverter Logic (Generic Mode Mapping)
+            vol.Optional(CONF_MODE_OPTION_NORMAL, default=curr_mode_normal): str,
+            vol.Optional(CONF_MODE_OPTION_FORCE_CHARGE, default=curr_mode_charge): str,
+
+            # 2. Inverter SoC Limit
             vol.Optional(CONF_INVERTER_MIN_SOC_ENTITY, description={"suggested_value": current_inv_entity}): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
             ),
             vol.Optional(CONF_INVERTER_MIN_SOC_INVERT, default=get_opt(CONF_INVERTER_MIN_SOC_INVERT, False)): bool,
 
-            # 2. SoC Slider
+            # 3. SoC Slider
             vol.Optional(CONF_TARGET_SOC, description={"suggested_value": get_opt(CONF_TARGET_SOC, DEFAULT_TARGET_SOC)}): 
                 selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, unit_of_measurement="%")),
             vol.Optional(CONF_MIN_SOC, description={"suggested_value": get_opt(CONF_MIN_SOC, DEFAULT_MIN_SOC)}): 
                 selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, unit_of_measurement="%")),
 
-            # 3. Faktoren
+            # 4. Faktoren
             vol.Optional(CONF_BATTERY_EFFICIENCY, description={"suggested_value": get_opt(CONF_BATTERY_EFFICIENCY, DEFAULT_EFFICIENCY)}): vol.Coerce(float),
             vol.Optional(CONF_PV_SAFETY_FACTOR, description={"suggested_value": get_opt(CONF_PV_SAFETY_FACTOR, DEFAULT_PV_SAFETY)}): vol.Coerce(float),
             vol.Optional(CONF_MIN_PROFIT, description={"suggested_value": get_opt(CONF_MIN_PROFIT, DEFAULT_MIN_PROFIT)}): vol.Coerce(float),
             
-            # 4. Spread
+            # 5. Spread
             vol.Optional(CONF_MIN_SPREAD, description={"suggested_value": get_opt(CONF_MIN_SPREAD, DEFAULT_MIN_SPREAD)}): vol.Coerce(float),
             vol.Optional(CONF_SOC_MED, description={"suggested_value": get_opt(CONF_SOC_MED, DEFAULT_SOC_MED)}): vol.Coerce(float),
             vol.Optional(CONF_SPREAD_MED, description={"suggested_value": get_opt(CONF_SPREAD_MED, DEFAULT_SPREAD_MED)}): vol.Coerce(float),
             vol.Optional(CONF_SOC_HIGH, description={"suggested_value": get_opt(CONF_SOC_HIGH, DEFAULT_SOC_HIGH)}): vol.Coerce(float),
             vol.Optional(CONF_SPREAD_HIGH, description={"suggested_value": get_opt(CONF_SPREAD_HIGH, DEFAULT_SPREAD_HIGH)}): vol.Coerce(float),
 
-            # 5. Sleep Over
+            # 6. Sleep Over
             vol.Optional(CONF_SLEEP_SOC, description={"suggested_value": get_opt(CONF_SLEEP_SOC, DEFAULT_SLEEP_SOC)}): vol.Coerce(float),
             vol.Optional(CONF_MORNING_DIFF, description={"suggested_value": get_opt(CONF_MORNING_DIFF, DEFAULT_MORNING_DIFF)}): vol.Coerce(float),
         })
