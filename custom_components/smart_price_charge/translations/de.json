@@ -14,10 +14,13 @@
                 "data": {
                     "tibber_api_token": "Tibber API Token (von developer.tibber.com)",
                     "current_soc_sensor_id": "Batterie Ladestand (SoC %)",
-                    "inverter_mode_entity_id": "Wechselrichter Modus (Select Entity)",
                     "battery_capacity_kwh": "Batteriekapazität (kWh)",
                     "charger_power_kw": "Max. Ladeleistung (kW)",
-                    "reference_price_eur": "Referenzpreis Netz (z.B. 0.35 €)"
+                    "reference_price_eur": "Referenzpreis Netz (z.B. 0.35 €)",
+
+                    "inverter_mode_entity_id": "Wechselrichter Modus (Select Entity)",
+                    "mode_option_normal": "Name Normalbetrieb (z.B. 'General' oder 'maximise_self_consumption')",
+                    "mode_option_force_charge": "Name Ladebetrieb (z.B. 'Eco Charge' oder 'time_of_use_luna2000')"
                 }
             },
             "sensors": {
@@ -51,13 +54,15 @@
             "init": {
                 "title": "SmartPriceCharge Einstellungen",
                 "data": {
-                    "notification_active": "Benachrichtigungen senden?",
-                    "notification_service": "Notify Dienst (z.B. notify.persistent_notification)",
+                    "inverter_mode_entity_id": "Inverter Modus-Entität (Select)",
+                    "mode_option_normal": "Befehl für Normalbetrieb (Value)",
+                    "mode_option_force_charge": "Befehl für Laden (Value)",
+
                     "inverter_min_soc_entity_id": "Inverter Limit-Entität (z.B. GoodWe DoD)",
                     "inverter_min_soc_invert_logic": "Logik umkehren? (100 - Wert) für DoD",
                     "target_soc_pct": "Ladeziel SoC (%)",
                     "min_soc_pct": "Entladegrenze Fallback (%)", 
-                    
+
                     "battery_efficiency_factor": "Batterie Effizienz-Faktor (0.9 = 90%)",
                     "pv_forecast_safety_factor": "PV Prognose Sicherheits-Faktor",
                     "min_cycle_profit_eur": "Min. Zyklus-Gewinn (€)",
@@ -69,7 +74,10 @@
                     "spread_high_soc_eur": "Spread bei hohem SoC (€)",
                     
                     "sleep_over_soc": "Sleep-Over Reserve (%)",
-                    "morning_min_diff": "Morgen-Preisdifferenz für Sleep-Over (€)"
+                    "morning_min_diff": "Morgen-Preisdifferenz für Sleep-Over (€)",
+
+                    "notification_active": "Benachrichtigungen senden?",
+                    "notification_service": "Notify Dienst (z.B. notify.persistent_notification)"
                 }
             }
         }
