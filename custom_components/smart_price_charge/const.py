@@ -77,3 +77,8 @@ DEFAULT_REF_PRICE = 0.35
 # Defaults für Inverter Befehle
 DEFAULT_MODE_NORMAL = "maximise_self_consumption"
 DEFAULT_MODE_FORCE = "time_of_use_luna2000"
+# Fehlende Standardwerte ergänzen
+DEFAULT_MODE_NORMAL = "Normal"
+DEFAULT_MODE_FORCE = "ForceCharge"
+DEFAULT_MODE_STOP = "Stop" 
+# (Den letzten habe ich vorsorglich hinzugefügt, falls er auch fehlt)
