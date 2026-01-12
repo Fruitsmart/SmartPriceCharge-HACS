@@ -4,7 +4,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
-# Wir importieren alles aus const.py. Stelle sicher, dass die Datei existiert.
+# Wir importieren alles aus const.py.
 from .const import *
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,8 +31,9 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             
             # --- 2. INVERTER MODUS (Wechselrichter Steuerung) ---
             vol.Required(CONF_INVERTER_ENTITY): selector.EntitySelector(selector.EntitySelectorConfig(domain=["select", "input_select"])),
-            vol.Required(CONF_MODE_OPTION_NORMAL, default=DEFAULT_MODE_NORMAL): str,
-            vol.Required(CONF_MODE_OPTION_FORCE_CHARGE, default=DEFAULT_MODE_FORCE): str,
+            # FIX: Hier feste Werte statt Variablen nutzen, um Import-Fehler zu vermeiden
+            vol.Required(CONF_MODE_OPTION_NORMAL, default="Normal"): str,
+            vol.Required(CONF_MODE_OPTION_FORCE_CHARGE, default="ForceCharge"): str,
             
             # --- 3. INVERTER LIMITS (DoD / MinSoc) ---
             vol.Optional(CONF_INVERTER_MIN_SOC_ENTITY): selector.EntitySelector(
@@ -82,13 +83,10 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
         """Initialisiert den Options Flow."""
-        # Log-Eintrag zur Bestätigung, dass der neue Code geladen wurde
         _LOGGER.info("SmartPriceOptionsFlowHandler fix geladen")
         
         # WICHTIG: Die Property self.config_entry ist in neueren HA Versionen schreibgeschützt!
-        # Wir speichern die Entry daher in einer privaten Variable self._config_entry.
         self._config_entry = config_entry
-        # Super-Init aufrufen für saubere Vererbung
         super().__init__()
 
     async def async_step_init(self, user_input=None):
@@ -107,8 +105,9 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
 
         # Bestehende Werte laden
         current_inv_mode_entity = get_opt(CONF_INVERTER_ENTITY, None)
-        current_inv_mode_normal = get_opt(CONF_MODE_OPTION_NORMAL, DEFAULT_MODE_NORMAL)
-        current_inv_mode_force = get_opt(CONF_MODE_OPTION_FORCE_CHARGE, DEFAULT_MODE_FORCE)
+        # FIX: Feste Werte verwenden
+        current_inv_mode_normal = get_opt(CONF_MODE_OPTION_NORMAL, "Normal")
+        current_inv_mode_force = get_opt(CONF_MODE_OPTION_FORCE_CHARGE, "ForceCharge")
         
         current_inv_min_soc = get_opt(CONF_INVERTER_MIN_SOC_ENTITY, None)
         current_notify_service = get_opt(CONF_NOTIFY_SERVICE, "")
