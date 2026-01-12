@@ -14,26 +14,33 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        # FIX für HA 2024.12+: Entry übergeben
+        # FIX: Der Handler muss den config_entry erhalten
         return SmartPriceOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
+        """Schritt 1: Initiale Einrichtung."""
         if user_input is not None:
             self.context["user_input"] = user_input
             return await self.async_step_sensors()
 
         data_schema = vol.Schema({
+            # --- 1. GRUNDLAGEN ---
             vol.Required(CONF_TIBBER_TOKEN): str,
             vol.Required(CONF_SOC_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="battery")),
             
-            # --- INVERTER KONFIGURATION (V1.1) ---
-            # 1. Die Entität (Dropdown/Input Select)
+            # --- 2. INVERTER MODUS (Wechselrichter Steuerung) ---
             vol.Required(CONF_INVERTER_ENTITY): selector.EntitySelector(selector.EntitySelectorConfig(domain=["select", "input_select"])),
-            # 2. Der Befehl für Normalbetrieb (Text)
             vol.Required(CONF_MODE_OPTION_NORMAL, default=DEFAULT_MODE_NORMAL): str,
-            # 3. Der Befehl für Zwangs-Laden (Text)
             vol.Required(CONF_MODE_OPTION_FORCE_CHARGE, default=DEFAULT_MODE_FORCE): str,
             
+            # --- 3. INVERTER LIMITS (DoD / MinSoc) ---
+            # HIER: Entität UND Logik-Umkehr direkt im Setup
+            vol.Optional(CONF_INVERTER_MIN_SOC_ENTITY): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
+            ),
+            vol.Optional(CONF_INVERTER_MIN_SOC_INVERT, default=False): bool,
+
+            # --- 4. SPEICHER DATEN ---
             vol.Required(CONF_REFERENCE_PRICE, default=DEFAULT_REF_PRICE): vol.Coerce(float),
             vol.Required(CONF_BATTERY_CAPACITY, default=DEFAULT_CAPACITY): vol.Coerce(float),
             vol.Required(CONF_CHARGER_POWER, default=DEFAULT_CHARGER_POWER): vol.Coerce(float),
@@ -41,6 +48,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="user", data_schema=data_schema)
 
     async def async_step_sensors(self, user_input=None):
+        """Schritt 2: Sensoren."""
         if user_input is not None:
             self.context["user_input"].update(user_input)
             return await self.async_step_forecast()
@@ -54,6 +62,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="sensors", data_schema=data_schema)
 
     async def async_step_forecast(self, user_input=None):
+        """Schritt 3: Forecast & Abschluss."""
         if user_input is not None:
             data = {**self.context.get("user_input", {}), **user_input}
             return self.async_create_entry(title="SmartPrice Manager", data=data)
@@ -69,7 +78,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="forecast", data_schema=data_schema)
 
 class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handhabt die Einstellungen."""
+    """Handhabt die nachträglichen Einstellungen."""
 
     def __init__(self, config_entry):
         # FIX: Speichern in _config_entry
@@ -100,16 +109,14 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(CONF_NOTIFY_ACTIVE, default=get_opt(CONF_NOTIFY_ACTIVE, True)): bool,
             vol.Optional(CONF_NOTIFY_SERVICE, description={"suggested_value": current_notify_service}): selector.TextSelector(),
 
-            # --- 1. INVERTER LOGIC & CUSTOM COMMANDS ---
-            # Entität Auswahl
+            # --- 1. INVERTER LOGIC ---
             vol.Optional(CONF_INVERTER_ENTITY, description={"suggested_value": current_inv_mode_entity}): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=["select", "input_select"])
             ),
-            # Befehl Namen (String Input)
             vol.Optional(CONF_MODE_OPTION_NORMAL, description={"suggested_value": current_inv_mode_normal}): str,
             vol.Optional(CONF_MODE_OPTION_FORCE_CHARGE, description={"suggested_value": current_inv_mode_force}): str,
 
-            # Min SOC Logic
+            # Min SOC / DoD Logic
             vol.Optional(CONF_INVERTER_MIN_SOC_ENTITY, description={"suggested_value": current_inv_min_soc}): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
             ),

@@ -19,8 +19,11 @@
                     "reference_price_eur": "Referenzpreis Netz (z.B. 0.35 €)",
 
                     "inverter_mode_entity_id": "Wechselrichter Modus (Select Entity)",
-                    "mode_option_normal": "Name Normalbetrieb (z.B. 'General' oder 'maximise_self_consumption')",
-                    "mode_option_force_charge": "Name Ladebetrieb (z.B. 'Eco Charge' oder 'time_of_use_luna2000')"
+                    "mode_option_normal": "Befehl Normalbetrieb (z.B. 'General', 'Default')",
+                    "mode_option_force_charge": "Befehl Ladebetrieb (z.B. 'Eco Charge', 'Force')",
+
+                    "inverter_min_soc_entity_id": "Optional: Inverter Limit-Entität (z.B. GoodWe DoD)",
+                    "inverter_min_soc_invert_logic": "Logik umkehren? (100 - Wert) für DoD"
                 }
             },
             "sensors": {
@@ -55,8 +58,8 @@
                 "title": "SmartPriceCharge Einstellungen",
                 "data": {
                     "inverter_mode_entity_id": "Inverter Modus-Entität (Select)",
-                    "mode_option_normal": "Befehl für Normalbetrieb (Value)",
-                    "mode_option_force_charge": "Befehl für Laden (Value)",
+                    "mode_option_normal": "Befehl für Normalbetrieb (Text)",
+                    "mode_option_force_charge": "Befehl für Laden (Text)",
 
                     "inverter_min_soc_entity_id": "Inverter Limit-Entität (z.B. GoodWe DoD)",
                     "inverter_min_soc_invert_logic": "Logik umkehren? (100 - Wert) für DoD",
@@ -97,7 +100,6 @@
             "track_discharge": { "name": "Wert Entladung (Gesamt)" },
             "track_pv": { "name": "Wert PV Direkt (Gesamt)" },
             "track_kwh": { "name": "Geladen Gesamt (Zähler)" }
-            
         },
         "switch": {
             "automatik": { "name": "Automatik Aktiv" }
