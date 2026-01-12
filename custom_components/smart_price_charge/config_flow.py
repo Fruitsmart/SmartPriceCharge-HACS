@@ -4,6 +4,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
+# Wir importieren alles aus const.py. Stelle sicher, dass die Datei existiert.
 from .const import *
 
 _LOGGER = logging.getLogger(__name__)
@@ -14,6 +15,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
+        """Erstellt den Options-Flow Handler."""
         return SmartPriceOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
@@ -79,14 +81,19 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
     """Handhabt die nachträglichen Einstellungen."""
 
     def __init__(self, config_entry):
-        # Wir nutzen _config_entry (mit Unterstrich), um Konflikte mit der
-        # schreibgeschützten Eigenschaft 'config_entry' in neueren HA-Versionen zu vermeiden.
+        """Initialisiert den Options Flow."""
+        # WICHTIG: Die Property self.config_entry ist in neueren HA Versionen schreibgeschützt!
+        # Wir speichern die Entry daher in einer privaten Variable self._config_entry.
         self._config_entry = config_entry
+        # Super-Init aufrufen für saubere Vererbung
+        super().__init__()
 
     async def async_step_init(self, user_input=None):
+        """Verwaltet die Optionen."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        # Zugriff auf Optionen über unsere private Variable
         opts = self._config_entry.options
         data = self._config_entry.data
         
