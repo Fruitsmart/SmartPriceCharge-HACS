@@ -50,10 +50,19 @@ CONF_SLEEP_SOC = "sleep_over_soc"
 CONF_MORNING_DIFF = "morning_min_diff"
 
 # SoC & Inverter Logic
+CONF_HOST = "host"
+CONF_PORT = "port"
+CONF_SCAN_INTERVAL = "scan_interval"
+
+# SoC & Inverter Logic
 CONF_TARGET_SOC = "target_soc_pct"
-CONF_MIN_SOC = "min_soc_pct"
+CONF_MIN_SOC = "min_soc_pct"  # Updated to match your snippet
+CONF_MAX_SOC = "max_soc"
+CONF_CHARGE_POWER = "charge_power"
+CONF_DISCHARGE_POWER = "discharge_power"
+
 CONF_INVERTER_MIN_SOC_ENTITY = "inverter_min_soc_entity_id"
-CONF_INVERTER_MIN_SOC_INVERT = "inverter_min_soc_invert_logic" 
+CONF_INVERTER_MIN_SOC_INVERT = "inverter_min_soc_invert_logic"
 
 # --- Defaults ---
 DEFAULT_EFFICIENCY = 0.90
@@ -73,3 +82,9 @@ DEFAULT_MIN_SOC = 10.0
 DEFAULT_CAPACITY = 5.0
 DEFAULT_CHARGER_POWER = 3.0
 DEFAULT_REF_PRICE = 0.35
+DEFAULT_PORT = 502
+DEFAULT_SCAN_INTERVAL = 30
+DEFAULT_MIN_SOC = 10
+DEFAULT_MAX_SOC = 100
+DEFAULT_CHARGE_POWER = 3000
+DEFAULT_DISCHARGE_POWER = 3000
