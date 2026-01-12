@@ -2,7 +2,7 @@
 import logging
 import aiohttp
 import math
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, time
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 import homeassistant.util.dt as dt_util
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
@@ -127,22 +127,53 @@ class SmartPriceChargeManager(DataUpdateCoordinator):
             except: pass
         return default
 
-    async def _set_inverter_mode(self, target_mode):
-        self.recommendation_mode = target_mode
+    # --- HIER IST DIE WICHTIGSTE ÄNDERUNG FÜR HUAWEI/GENERIC ---
+    async def _set_inverter_mode(self, internal_mode):
+        """
+        Setzt den Inverter Modus basierend auf dem Mapping.
+        internal_mode: "general" oder "eco_charge"
+        """
+        self.recommendation_mode = internal_mode
         entity = self.config.get(CONF_INVERTER_ENTITY)
         if not entity: return
+
+        # 1. Optionen laden (mit Fallback auf Defaults)
+        opts = self.entry.options
+        data = self.entry.data
+        def get_opt(key, default):
+            if key in opts: return opts[key]
+            if key in data: return data[key]
+            return default
+
+        # Mapping holen
+        mapped_normal = get_opt(CONF_MODE_OPTION_NORMAL, "General")
+        mapped_charge = get_opt(CONF_MODE_OPTION_FORCE_CHARGE, "Eco Charge")
+
+        # 2. Übersetzen
+        target_option = mapped_normal
+        if internal_mode == "eco_charge":
+            target_option = mapped_charge
+        
+        # 3. Senden (wenn nötig)
         now = dt_util.now()
         should_send = True
+        
+        # Nur alle 15 Min senden oder wenn Modus falsch ist
         if self.last_mode_command_time:
              if (now - self.last_mode_command_time).total_seconds() < 900: 
                  cur_state = self.hass.states.get(entity)
-                 if cur_state and cur_state.state == target_mode: should_send = False
+                 # Wir vergleichen mit dem ÜBERSETZTEN Wert
+                 if cur_state and cur_state.state == target_option: 
+                     should_send = False
+        
         if should_send:
             domain = "input_select" if "input_select" in entity else "select"
             try:
-                await self.hass.services.async_call(domain, "select_option", {"entity_id": entity, "option": target_mode})
+                _LOGGER.info(f"Sende Inverter Modus '{target_option}' an {entity}")
+                await self.hass.services.async_call(domain, "select_option", {"entity_id": entity, "option": target_option})
                 self.last_mode_command_time = now
-            except: pass
+            except Exception as e: 
+                _LOGGER.error(f"Fehler beim Modus setzen: {e}")
 
     async def _set_inverter_limit(self, target_min_soc):
         opts = self.entry.options
