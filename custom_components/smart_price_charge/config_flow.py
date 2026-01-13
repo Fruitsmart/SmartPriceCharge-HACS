@@ -9,7 +9,7 @@ from .const import *
 _LOGGER = logging.getLogger(__name__)
 
 # --- SAFETY FALLBACKS ---
-# Falls HACS/HA alte const.py cachen oder Imports fehlschlagen.
+# Falls Variablen beim Import fehlen (Caching Probleme), setzen wir sie hier hart.
 if 'DEFAULT_MODE_NORMAL' not in locals():
     DEFAULT_MODE_NORMAL = "Normal"
 if 'DEFAULT_MODE_FORCE' not in locals():
@@ -22,6 +22,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
+        """Erstellt den Options-Flow Handler."""
         return SmartPriceOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
@@ -41,7 +42,7 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(CONF_INVERTER_ENTITY): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=["select", "input_select"])
             ),
-            # FIX: Jetzt nutzen wir sicher die Konstanten
+            # FIX: Konstanten nutzen
             vol.Required(CONF_MODE_OPTION_NORMAL, default=DEFAULT_MODE_NORMAL): str,
             vol.Required(CONF_MODE_OPTION_FORCE_CHARGE, default=DEFAULT_MODE_FORCE): str,
             
@@ -92,19 +93,17 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
     """Handhabt die Einstellungen."""
 
     def __init__(self, config_entry):
-        # FIX für 'AttributeError: property config_entry has no setter'
-        # In neuen HA Versionen darf man self.config_entry nicht direkt setzen.
-        # Man muss die interne Variable self._config_entry (mit Unterstrich) nutzen.
+        # --- DER CRITICAL FIX ---
+        # Verwende _config_entry (mit Unterstrich), da config_entry (ohne)
+        # jetzt schreibgeschützt ist.
         self._config_entry = config_entry
-        # Super init aufrufen (sicherer als der alte try/except Block)
-        super().__init__()
+        # ------------------------
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        # Da wir self._config_entry gesetzt haben, funktioniert der Zugriff
-        # auf self.config_entry (Property) jetzt korrekt.
+        # Zugriff über die Property config_entry (ohne Unterstrich) ist erlaubt (Lesen)
         opts = self.config_entry.options
         data = self.config_entry.data
         
