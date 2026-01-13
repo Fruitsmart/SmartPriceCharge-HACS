@@ -4,10 +4,17 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
-# Wir importieren alles aus const, aber nutzen kritische Defaults direkt als Text
 from .const import *
 
 _LOGGER = logging.getLogger(__name__)
+
+# --- SAFETY FALLBACKS ---
+# Falls HACS/HA alte const.py cachen oder Imports fehlschlagen.
+if 'DEFAULT_MODE_NORMAL' not in locals():
+    DEFAULT_MODE_NORMAL = "Normal"
+if 'DEFAULT_MODE_FORCE' not in locals():
+    DEFAULT_MODE_FORCE = "ForceCharge"
+# ------------------------
 
 class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -15,7 +22,6 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        """Erstellt den Options-Flow Handler."""
         return SmartPriceOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
@@ -35,9 +41,9 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(CONF_INVERTER_ENTITY): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=["select", "input_select"])
             ),
-            # FIX: Feste Werte ("General", "Eco Charge") statt Variablen
-            vol.Required(CONF_MODE_OPTION_NORMAL, default="General"): str,
-            vol.Required(CONF_MODE_OPTION_FORCE_CHARGE, default="Eco Charge"): str,
+            # FIX: Jetzt nutzen wir sicher die Konstanten
+            vol.Required(CONF_MODE_OPTION_NORMAL, default=DEFAULT_MODE_NORMAL): str,
+            vol.Required(CONF_MODE_OPTION_FORCE_CHARGE, default=DEFAULT_MODE_FORCE): str,
             
             # --- 3. INVERTER LIMITS ---
             vol.Optional(CONF_INVERTER_MIN_SOC_ENTITY): selector.EntitySelector(
@@ -46,9 +52,9 @@ class SmartPriceChargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(CONF_INVERTER_MIN_SOC_INVERT, default=False): bool,
 
             # --- 4. SPEICHER DATEN ---
-            vol.Required(CONF_REFERENCE_PRICE, default=0.35): vol.Coerce(float),
-            vol.Required(CONF_BATTERY_CAPACITY, default=5.0): vol.Coerce(float),
-            vol.Required(CONF_CHARGER_POWER, default=3.0): vol.Coerce(float),
+            vol.Required(CONF_REFERENCE_PRICE, default=DEFAULT_REF_PRICE): vol.Coerce(float),
+            vol.Required(CONF_BATTERY_CAPACITY, default=DEFAULT_CAPACITY): vol.Coerce(float),
+            vol.Required(CONF_CHARGER_POWER, default=DEFAULT_CHARGER_POWER): vol.Coerce(float),
         })
         return self.async_show_form(step_id="user", data_schema=data_schema)
 
@@ -86,18 +92,19 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
     """Handhabt die Einstellungen."""
 
     def __init__(self, config_entry):
-        # FIX: super().__init__() aufrufen, um Abstürze zu vermeiden
-        self.config_entry = config_entry
-        # In manchen HA Versionen nötig:
-        try:
-            super().__init__()
-        except:
-            pass 
+        # FIX für 'AttributeError: property config_entry has no setter'
+        # In neuen HA Versionen darf man self.config_entry nicht direkt setzen.
+        # Man muss die interne Variable self._config_entry (mit Unterstrich) nutzen.
+        self._config_entry = config_entry
+        # Super init aufrufen (sicherer als der alte try/except Block)
+        super().__init__()
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        # Da wir self._config_entry gesetzt haben, funktioniert der Zugriff
+        # auf self.config_entry (Property) jetzt korrekt.
         opts = self.config_entry.options
         data = self.config_entry.data
         
@@ -109,16 +116,15 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
         current_inv_entity = get_opt(CONF_INVERTER_MIN_SOC_ENTITY, None)
         current_notify_service = get_opt(CONF_NOTIFY_SERVICE, "")
         
-        # FIX: Feste Werte verwenden
-        curr_mode_normal = get_opt(CONF_MODE_OPTION_NORMAL, "General")
-        curr_mode_charge = get_opt(CONF_MODE_OPTION_FORCE_CHARGE, "Eco Charge")
+        curr_mode_normal = get_opt(CONF_MODE_OPTION_NORMAL, DEFAULT_MODE_NORMAL)
+        curr_mode_charge = get_opt(CONF_MODE_OPTION_FORCE_CHARGE, DEFAULT_MODE_FORCE)
 
         schema = vol.Schema({
             # BENACHRICHTIGUNGEN
             vol.Optional(CONF_NOTIFY_ACTIVE, default=get_opt(CONF_NOTIFY_ACTIVE, True)): bool,
             vol.Optional(CONF_NOTIFY_SERVICE, description={"suggested_value": current_notify_service}): selector.TextSelector(),
 
-            # 1. Inverter Logic (Generic Mode Mapping)
+            # 1. Inverter Logic
             vol.Optional(CONF_MODE_OPTION_NORMAL, default=curr_mode_normal): str,
             vol.Optional(CONF_MODE_OPTION_FORCE_CHARGE, default=curr_mode_charge): str,
 
@@ -129,25 +135,25 @@ class SmartPriceOptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(CONF_INVERTER_MIN_SOC_INVERT, default=get_opt(CONF_INVERTER_MIN_SOC_INVERT, False)): bool,
 
             # 3. SoC Slider
-            vol.Optional(CONF_TARGET_SOC, description={"suggested_value": get_opt(CONF_TARGET_SOC, 100.0)}): 
+            vol.Optional(CONF_TARGET_SOC, description={"suggested_value": get_opt(CONF_TARGET_SOC, DEFAULT_TARGET_SOC)}): 
                 selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, unit_of_measurement="%")),
-            vol.Optional(CONF_MIN_SOC, description={"suggested_value": get_opt(CONF_MIN_SOC, 10.0)}): 
+            vol.Optional(CONF_MIN_SOC, description={"suggested_value": get_opt(CONF_MIN_SOC, DEFAULT_MIN_SOC)}): 
                 selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, unit_of_measurement="%")),
 
             # 4. Faktoren
-            vol.Optional(CONF_BATTERY_EFFICIENCY, description={"suggested_value": get_opt(CONF_BATTERY_EFFICIENCY, 0.90)}): vol.Coerce(float),
-            vol.Optional(CONF_PV_SAFETY_FACTOR, description={"suggested_value": get_opt(CONF_PV_SAFETY_FACTOR, 0.50)}): vol.Coerce(float),
-            vol.Optional(CONF_MIN_PROFIT, description={"suggested_value": get_opt(CONF_MIN_PROFIT, 0.02)}): vol.Coerce(float),
+            vol.Optional(CONF_BATTERY_EFFICIENCY, description={"suggested_value": get_opt(CONF_BATTERY_EFFICIENCY, DEFAULT_EFFICIENCY)}): vol.Coerce(float),
+            vol.Optional(CONF_PV_SAFETY_FACTOR, description={"suggested_value": get_opt(CONF_PV_SAFETY_FACTOR, DEFAULT_PV_SAFETY)}): vol.Coerce(float),
+            vol.Optional(CONF_MIN_PROFIT, description={"suggested_value": get_opt(CONF_MIN_PROFIT, DEFAULT_MIN_PROFIT)}): vol.Coerce(float),
             
             # 5. Spread
-            vol.Optional(CONF_MIN_SPREAD, description={"suggested_value": get_opt(CONF_MIN_SPREAD, 0.04)}): vol.Coerce(float),
-            vol.Optional(CONF_SOC_MED, description={"suggested_value": get_opt(CONF_SOC_MED, 75.0)}): vol.Coerce(float),
-            vol.Optional(CONF_SPREAD_MED, description={"suggested_value": get_opt(CONF_SPREAD_MED, 0.15)}): vol.Coerce(float),
-            vol.Optional(CONF_SOC_HIGH, description={"suggested_value": get_opt(CONF_SOC_HIGH, 90.0)}): vol.Coerce(float),
-            vol.Optional(CONF_SPREAD_HIGH, description={"suggested_value": get_opt(CONF_SPREAD_HIGH, 0.25)}): vol.Coerce(float),
+            vol.Optional(CONF_MIN_SPREAD, description={"suggested_value": get_opt(CONF_MIN_SPREAD, DEFAULT_MIN_SPREAD)}): vol.Coerce(float),
+            vol.Optional(CONF_SOC_MED, description={"suggested_value": get_opt(CONF_SOC_MED, DEFAULT_SOC_MED)}): vol.Coerce(float),
+            vol.Optional(CONF_SPREAD_MED, description={"suggested_value": get_opt(CONF_SPREAD_MED, DEFAULT_SPREAD_MED)}): vol.Coerce(float),
+            vol.Optional(CONF_SOC_HIGH, description={"suggested_value": get_opt(CONF_SOC_HIGH, DEFAULT_SOC_HIGH)}): vol.Coerce(float),
+            vol.Optional(CONF_SPREAD_HIGH, description={"suggested_value": get_opt(CONF_SPREAD_HIGH, DEFAULT_SPREAD_HIGH)}): vol.Coerce(float),
 
             # 6. Sleep Over
-            vol.Optional(CONF_SLEEP_SOC, description={"suggested_value": get_opt(CONF_SLEEP_SOC, 30.0)}): vol.Coerce(float),
-            vol.Optional(CONF_MORNING_DIFF, description={"suggested_value": get_opt(CONF_MORNING_DIFF, 0.10)}): vol.Coerce(float),
+            vol.Optional(CONF_SLEEP_SOC, description={"suggested_value": get_opt(CONF_SLEEP_SOC, DEFAULT_SLEEP_SOC)}): vol.Coerce(float),
+            vol.Optional(CONF_MORNING_DIFF, description={"suggested_value": get_opt(CONF_MORNING_DIFF, DEFAULT_MORNING_DIFF)}): vol.Coerce(float),
         })
         return self.async_show_form(step_id="init", data_schema=schema)
