@@ -7,7 +7,7 @@ CONF_TIBBER_TOKEN = "tibber_api_token"
 CONF_SOC_SENSOR = "current_soc_sensor_id"
 CONF_BATTERY_CAPACITY = "battery_capacity_kwh"
 CONF_CHARGER_POWER = "charger_power_kw"
-CONF_REFERENCE_PRICE = "reference_price_eur"
+CONF_REFERENCE_PRICE = "reference_price_eur" 
 
 # --- Inverter Logic & Custom Commands ---
 CONF_INVERTER_ENTITY = "inverter_mode_entity_id"
@@ -53,7 +53,7 @@ CONF_MORNING_DIFF = "morning_min_diff"
 CONF_TARGET_SOC = "target_soc_pct"
 CONF_MIN_SOC = "min_soc_pct"
 CONF_INVERTER_MIN_SOC_ENTITY = "inverter_min_soc_entity_id"
-CONF_INVERTER_MIN_SOC_INVERT = "inverter_min_soc_invert_logic"
+CONF_INVERTER_MIN_SOC_INVERT = "inverter_min_soc_invert_logic" 
 
 # --- Defaults ---
 DEFAULT_EFFICIENCY = 0.90
@@ -74,8 +74,7 @@ DEFAULT_CAPACITY = 5.0
 DEFAULT_CHARGER_POWER = 3.0
 DEFAULT_REF_PRICE = 0.35
 
-# Defaults für Inverter Befehle
-# HIER WAREN DUBLETTEN - BEREINIGT:
+# Defaults für Inverter Befehle (Nur EINMAL definiert)
 DEFAULT_MODE_NORMAL = "Normal"
 DEFAULT_MODE_FORCE = "ForceCharge"
 DEFAULT_MODE_STOP = "Stop"
