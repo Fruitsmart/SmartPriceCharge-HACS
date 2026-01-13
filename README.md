@@ -2,7 +2,7 @@
 [![Version](https://img.shields.io/badge/version-v1.1.0-blue.svg)](https://github.com/Fruitsmart/SmartPriceCharge-HACS/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=fam.obst@live.de&item_name=TibberSmartCharge&currency_code=EUR)
-
+[![License](https://img.shields.io/badge/discord.svg)](LICENSE)
 # 🔋 SmartPriceCharge
 
 [](https://github.com/hacs/integration)
