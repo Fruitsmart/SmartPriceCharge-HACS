@@ -7,9 +7,9 @@ CONF_TIBBER_TOKEN = "tibber_api_token"
 CONF_SOC_SENSOR = "current_soc_sensor_id"
 CONF_BATTERY_CAPACITY = "battery_capacity_kwh"
 CONF_CHARGER_POWER = "charger_power_kw"
-CONF_REFERENCE_PRICE = "reference_price_eur" 
+CONF_REFERENCE_PRICE = "reference_price_eur"
 
-# --- Inverter Logic & Custom Commands (WICHTIG für v1.1) ---
+# --- Inverter Logic & Custom Commands ---
 CONF_INVERTER_ENTITY = "inverter_mode_entity_id"
 CONF_MODE_OPTION_NORMAL = "mode_option_normal"
 CONF_MODE_OPTION_FORCE_CHARGE = "mode_option_force_charge"
@@ -53,7 +53,7 @@ CONF_MORNING_DIFF = "morning_min_diff"
 CONF_TARGET_SOC = "target_soc_pct"
 CONF_MIN_SOC = "min_soc_pct"
 CONF_INVERTER_MIN_SOC_ENTITY = "inverter_min_soc_entity_id"
-CONF_INVERTER_MIN_SOC_INVERT = "inverter_min_soc_invert_logic" 
+CONF_INVERTER_MIN_SOC_INVERT = "inverter_min_soc_invert_logic"
 
 # --- Defaults ---
 DEFAULT_EFFICIENCY = 0.90
@@ -75,10 +75,7 @@ DEFAULT_CHARGER_POWER = 3.0
 DEFAULT_REF_PRICE = 0.35
 
 # Defaults für Inverter Befehle
-DEFAULT_MODE_NORMAL = "maximise_self_consumption"
-DEFAULT_MODE_FORCE = "time_of_use_luna2000"
-# Fehlende Standardwerte ergänzen
+# HIER WAREN DUBLETTEN - BEREINIGT:
 DEFAULT_MODE_NORMAL = "Normal"
 DEFAULT_MODE_FORCE = "ForceCharge"
-DEFAULT_MODE_STOP = "Stop" 
-# (Den letzten habe ich vorsorglich hinzugefügt, falls er auch fehlt)
+DEFAULT_MODE_STOP = "Stop"
